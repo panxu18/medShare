@@ -1,5 +1,7 @@
 package com.xp.medshare.service.impl;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.webank.weid.protocol.base.Cpt;
 import com.webank.weid.protocol.base.CptBaseInfo;
 import com.webank.weid.protocol.base.WeIdAuthentication;
@@ -12,13 +14,17 @@ import com.webank.weid.rpc.CredentialService;
 import com.webank.weid.rpc.WeIdService;
 import com.xp.medshare.contract.client.RecordClient;
 import com.xp.medshare.model.SimpleCredential;
+import com.xp.medshare.model.UserAccountDto;
 import com.xp.medshare.model.domodel.AnonymousEvidenceDo;
+import com.xp.medshare.model.domodel.CryptoDo;
 import com.xp.medshare.model.domodel.EvidenceDo;
 import com.xp.medshare.model.vomodel.Response;
 import com.xp.medshare.model.vomodel.ResponseCode;
 import com.xp.medshare.service.AgentService;
 import com.xp.medshare.util.CryptoUtil;
+import com.xp.medshare.util.FileUtil;
 import com.xp.medshare.util.KeyUtil;
+import com.xp.medshare.util.PropertiesUtil;
 import com.xp.medshare.util.crypto.Crypto;
 import com.xp.medshare.util.crypto.ProxyReEncryptionUtil;
 import org.fisco.bcos.sdk.transaction.model.exception.ContractException;
@@ -35,6 +41,8 @@ import java.util.Map;
 public class AgentServiceImpl implements AgentService {
     // 默认身份表示符
     private static final String DEFAULT_WEID = "did:weid:1:0x23fd23af356c924cdfba4f98a15b9b6409c0b56f";
+
+    private static final String SUPERVISOR_PATH = PropertiesUtil.getProperty("supervisorAccount.path");
 
     @Autowired
     RecordClient recordClient;
@@ -75,17 +83,29 @@ public class AgentServiceImpl implements AgentService {
 
     @Override
     public Response<Object> registerUser() {
+        return Response.of(ResponseCode.SUCCESS, createUser());
+    }
+
+    private UserAccountDto createUser() {
         ResponseData<CreateWeIdDataResult> result = weIdService.createWeId();
         CreateWeIdDataResult weIdDataResult = result.getResult();
         KeyUtil.savePrivateKey(weIdDataResult.getWeId(), weIdDataResult.getUserWeIdPrivateKey().getPrivateKey());
-        return Response.of(ResponseCode.SUCCESS, weIdDataResult);
+        UserAccountDto userAccountDto = new UserAccountDto();
+        userAccountDto.setId(weIdDataResult.getWeId());
+        userAccountDto.setPublicKey(weIdDataResult.getUserWeIdPublicKey().getPublicKey());
+        userAccountDto.setPrivateKey(weIdDataResult.getUserWeIdPrivateKey().getPrivateKey());
+        return userAccountDto;
     }
 
     @Override
     public Response<Object> queryDidDocument(String id) {
+        return Response.of(ResponseCode.SUCCESS, queryUserDocument(id));
+    }
+
+    private WeIdDocument queryUserDocument(String id) {
         ResponseData<WeIdDocument> result = weIdService.getWeIdDocument(id);
         WeIdDocument weIdDataResult = result.getResult();
-        return Response.of(ResponseCode.SUCCESS, weIdDataResult);
+        return weIdDataResult;
     }
 
     /**
@@ -140,14 +160,38 @@ public class AgentServiceImpl implements AgentService {
         String reKey = (String) authData.get("reKey");
         ProxyReEncryptionUtil encryptionUtil = new ProxyReEncryptionUtil();
         Crypto result = encryptionUtil.reEncrypt(crypto, new BigInteger(reKey));
-        CryptoUtil.saveReCrypto(cryptoId,result);
-        return Response.of(ResponseCode.SUCCESS, result);
+        CryptoDo cryptoDo = CryptoDo.of(result);
+        CryptoUtil.saveReCrypto(cryptoId,cryptoDo);
+        return Response.of(ResponseCode.SUCCESS, cryptoDo);
     }
 
     @Override
-    public Response<Object> uploadCrypto(String id, Crypto crypto) {
+    public Response<Object> uploadCrypto(String id, CryptoDo crypto) {
         CryptoUtil.saveCrypto(id, crypto);
-        return Response.of(ResponseCode.SUCCESS);
+        return Response.of(ResponseCode.SUCCESS,id);
+    }
+
+    @Override
+    public Response<Object> querySupervisor() {
+        String path = FileUtil.checkDir(SUPERVISOR_PATH);
+        String str = FileUtil.getDataByPath(path);
+        UserAccountDto account;
+        if (str == null || str.isEmpty()) {
+            account = createUser();
+            FileUtil.saveFile(path, JSON.toJSONString(account));
+        } else {
+            account = JSONObject.parseObject(str, UserAccountDto.class);
+        }
+        return Response.of(ResponseCode.SUCCESS, account);
+    }
+
+    @Override
+    public Response<Object> queryUserAccount(String id) {
+        WeIdDocument result = queryUserDocument(id);
+        UserAccountDto userAccountDto = new UserAccountDto();
+        userAccountDto.setId(id);
+        userAccountDto.setPublicKey(result.getPublicKey().get(0).getPublicKey());
+        return Response.of(ResponseCode.SUCCESS, userAccountDto);
     }
 
 

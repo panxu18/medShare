@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="all,follow">
+
+    <title>Home</title>
+
+    <!-- Core stylesheets -->
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="font-awesome-4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="css/font-icon-style.css">
+    <link rel="stylesheet" href="css/style.default.css" id="theme-stylesheet">
+    <!-- Core stylesheets -->
+    <link rel="stylesheet" href="css/form.css">
+
+    <!--Global Javascript -->
+    <script src="js/jquery.min.js"></script>
+    <script src="js/popper/popper.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/jquery.cookie.js"></script>
+    <script src="js/jquery.validate.min.js"></script>
+    <script src="js/front.js"></script>
+
+
+    <script src="js/vue.min.js"></script>
+    <script src="js/axios.min.js"></script>
+
+</head>
+
+<body> 
+
+<!--====================================================
+                         MAIN NAVBAR
+======================================================-->
+    <header class="header">
+        <nav class="navbar navbar-expand-lg ">
+            <div class="search-box">
+                <button class="dismiss"><i class="icon-close"></i></button>
+                <form id="searchForm" action="#" role="search">
+                    <input type="search" placeholder="Search Now" class="form-control">
+                </form>
+            </div>
+            <div class="container-fluid ">
+                <div class="navbar-holder d-flex align-items-center justify-content-between">
+                    <div class="navbar-header">
+                        <a href="index.html" class="navbar-brand">
+                            <div class="brand-text brand-big hidden-lg-down"><span class="img-fluid">区块链健康数据共享系统</span></div>
+                            <div class="brand-text brand-small"><img src="img/logo-icon.png" alt="Logo" class="img-fluid"></div>
+                        </a>
+                        <a id="toggle-btn" href="#" class="menu-btn active">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                        </a>
+                    </div>
+                </div>
+
+            </div>
+        </nav>
+    </header>
+
+<!--====================================================
+                        PAGE CONTENT
+======================================================-->
+    <div id="app" class="page-content d-flex align-items-stretch">
+
+        <!--***** SIDE NAVBAR *****-->
+        <nav class="side-navbar">
+            <!-- Sidebar Navidation Menus-->
+            <ul class="list-unstyled">
+                <li class="active"><a href="#account" aria-expanded="true" data-toggle="collapse">
+                    <i class="icon-interface-windows"></i>账户管理</a>
+                    <ul id="account" class="collapse list-unstyled show" >
+                        <li class="active"><a href="accountCreate.html">账户创建</a></li>
+                        <li><a href="accountQuery.html">账户查询</a></li>
+                        <li><a href="idAuth.html">身份认证</a></li>
+                    </ul>
+                </li>
+                <li><a href="#cpt" aria-expanded="false" data-toggle="collapse">
+                    <i class="icon-interface-windows"></i>CPT管理</a>
+                    <ul id="cpt" class="collapse list-unstyled">
+                        <li><a href="cptRegister.html">CPT注册</a></li>
+                        <li><a href="cptQuery.html">CPT查询</a></li>
+                    </ul>
+                </li>
+                <li><a href="#data" aria-expanded="false" data-toggle="collapse">
+                    <i class="icon-interface-windows"></i>数据管理</a>
+                    <ul id="data" class="collapse list-unstyled">
+                        <li><a href="credentialCreate.html">数据创建</a></li>
+                        <li><a href="credentialUpload.html">数据上传</a></li>
+                        <li><a href="credentialQuery.html">数据查询</a></li>
+                        <li><a href="credentialReceive.html">数据确认</a></li>
+                        <li><a href="credentialAuth.html">数据授权</a></li>
+                        <li><a href="credentialDownload.html">数据下载</a></li>
+                    </ul>
+                </li>
+                <li><a href="#verify" aria-expanded="false" data-toggle="collapse">
+                    <i class="icon-interface-windows"></i>凭证验证</a>
+                    <ul id="verify" class="collapse list-unstyled">
+                        <li><a href="credentialVerify.html">完整性校验</a></li>
+                        <li><a href="idRecovery.html">匿名身份恢复</a></li>
+                        <li><a href="idConnect.html">关联验证</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </nav>
+
+        <div class="content-inner form-cont">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="card form" id="form1">
+                        <div class="card-header">
+                            <h3>创建用户账户</h3>
+                        </div>
+                        <br>
+                        <div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="weId">身份标识符</label>
+                                        <input type="email" class="form-control" id="weId" aria-describedby="emailHelp"
+                                               disabled v-model="userAccount.id">
+                                        <small id="emailHelp" class="form-text text-muted">账户唯一ID</small>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="publicKey">公钥</label>
+                                        <input type="password" class="form-control" id="publicKey" disabled
+                                               v-model="userAccount.publicKey">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="exampleInputPassword1">私钥</label>
+                                        <input type="password" class="form-control" id="exampleInputPassword1" disabled
+                                               v-model="userAccount.privateKey">
+                                    </div>
+                                </div>
+                            </div>
+                            <button class="btn btn-general btn-blue mr-2" @click="createUser">创建</button>
+                            <button class="btn btn-general btn-white">保存</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+<script>
+    new Vue({
+      el: '#app',
+      data: {
+        userAccount: {
+            'id' : '',
+            'publicKey': '',
+            'privateKey': ''
+            },
+        },
+      methods: {
+
+        createUser: function() {
+            axios
+              .get('http://127.0.0.1:8080/agent/user/register')
+              .then(response => {
+                    console.log(response)
+                    this.userAccount = response.data.data
+                }
+                )
+              .catch(function (error) { // 请求失败处理
+                console.log(error);
+              });
+
+        }
+      }
+    })
+
+</script>
+</body>
+
+</html>

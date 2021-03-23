@@ -13,14 +13,14 @@ public class CryptoUtil {
     public static final String RECRYPTO_PATH =
             PropertiesUtil.getProperty("recrypto.path");
 
-    public static boolean saveCrypto(String id, Crypto crypto) {
+    public static boolean saveCrypto(String id, CryptoDo crypto) {
 
         try {
             String fileName = id;
             String checkPath = FileUtil.checkDir(CRYPTO_PATH);
             String filePath = checkPath + fileName;
             log.info("save crypto into file, id={}, filePath={}", id, filePath);
-            FileUtil.saveFile(filePath, JSONObject.toJSONString(CryptoDo.of(crypto)));
+            FileUtil.saveFile(filePath, JSONObject.toJSONString(crypto));
             return true;
         } catch (Exception e) {
             log.error("savePrivateKey error", e);
@@ -39,14 +39,14 @@ public class CryptoUtil {
         return crypto;
     }
 
-    public static boolean saveReCrypto(String id, Crypto crypto) {
+    public static boolean saveReCrypto(String id, CryptoDo crypto) {
 
         try {
             String fileName = id;
             String checkPath = FileUtil.checkDir(RECRYPTO_PATH);
             String filePath = checkPath + fileName;
             log.info("save crypto into file, id={}, filePath={}", id, filePath);
-            FileUtil.saveFile(filePath, JSONObject.toJSONString(CryptoDo.of(crypto)));
+            FileUtil.saveFile(filePath, JSONObject.toJSONString(crypto));
             return true;
         } catch (Exception e) {
             log.error("savePrivateKey error", e);

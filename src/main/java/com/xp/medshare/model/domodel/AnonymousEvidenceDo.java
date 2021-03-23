@@ -12,7 +12,7 @@ import java.math.BigInteger;
 public class AnonymousEvidenceDo {
     String id;
     String type;
-    String sharedSecret;
+    String sharedSecret; // 计算代理重加密秘钥时用于计算共享秘密值的盲化因子
     String index;
     String hash;
     String signature;

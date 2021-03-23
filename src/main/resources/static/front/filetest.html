@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>文件示例</title>
+    <meta name="name" content="content" charset="utf-8">
+  </head>
+  <body>
+      <input type="file" id="file" />
+      <input type="button" onclick="readText()" value="File Button">
+      <div id="tt">
+
+      </div>
+  </body>
+</html>
+<script charset="utf-8">
+var blobBuilder = new BlobBuilder(); // 创建BlobBuilder对象
+blobBuilder.append("我今天只说三句话；"); // 连续放入文本
+blobBuilder.append("包括这一句；");
+blobBuilder.append("我的话完了。");
+
+var url = window.URL.createObjectURL(blobBuilder.getBlob()); // 返回Blob对象并以此创建URL
+window.open(url); // 通过URL打开这个Blob对象
+
+fileEntry.createWriter(function (fileWriter) {
+    fileWriter.write(blobBuilder.getBlob()); // 返回Blob对象并通过fileWriter写入
+    fileWriter.onwriteend = function () {}; // 绑定写入操作完成后的事件
+});
+
+// window.onload=function () {
+//   if(typeof(FileReader)=="undefined")
+//   {
+//     alert("你的浏览器不支持文件读取");
+//     document.write("");
+//   }else
+//   {
+//     alert("你的浏览器支持文件读取");
+//   }
+// }
+//   function readText() {
+//       var file=document.getElementById("file").files[0];
+//       var reader=new FileReader();
+//       reader.readAsText(file);
+//       reader.onload=function(data)
+//       {
+//         var tt=document.getElementById("tt")
+//         tt.innerHTML=this.result;
+//       }
+//     }
+
+</script>

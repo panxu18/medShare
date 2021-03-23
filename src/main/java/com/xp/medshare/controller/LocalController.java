@@ -1,16 +1,16 @@
 package com.xp.medshare.controller;
 
-import com.xp.medshare.model.CredentialRequestDto;
-import com.xp.medshare.model.IdCommitmentReuest;
-import com.xp.medshare.model.ReKeyRequestDto;
-import com.xp.medshare.model.RecoveryRequest;
+import com.xp.medshare.model.*;
 import com.xp.medshare.model.domodel.DecryptDo;
 import com.xp.medshare.model.domodel.EncryptDo;
 import com.xp.medshare.model.vomodel.Response;
 import com.xp.medshare.service.LocalService;
+import com.xp.medshare.util.crypto.AnonymousParams;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import java.math.BigInteger;
 
 @Slf4j
 @RestController
@@ -66,7 +66,7 @@ public class LocalController {
 
     @PostMapping("reDecrypt/credential")
     public Response<Object> reDecrypt2Credential(@RequestBody DecryptDo requestDto) {
-        return localService.reDecrypt(requestDto.getSk(), requestDto.getCrypto());
+        return localService.reDecrypt2Credential(requestDto.getSk(), requestDto.getCrypto());
     }
 
     @PostMapping("idCommit")
@@ -82,5 +82,22 @@ public class LocalController {
     @PostMapping("recovery")
     public Response<Object> recoveryUserPk(@RequestBody RecoveryRequest request) {
         return localService.recoverAnonymous(request.getParam(), request.getSk(), request.getPk());
+    }
+
+    @PostMapping("sign")
+    public Response<Object> sign(@RequestBody SignRequst request) {
+        return localService.sign(request);
+    }
+
+    @PostMapping("receive")
+    public Response<Object> computeStealSk(@RequestBody StealSkRequest request) {
+        AnonymousParams params = new AnonymousParams();
+        params.setR(new BigInteger(request.getR()));
+        return localService.computeStealSk(params, request.getSk());
+    }
+
+    @PostMapping("credential/verify")
+    public Response<Object> verifySignature(@RequestBody CredentialVerifyDto request) {
+        return localService.verifySignature(request);
     }
 }

@@ -1,10 +1,12 @@
 package com.xp.medshare.util.crypto;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.math.BigInteger;
 
 @Data
+@NoArgsConstructor
 public class AnonymousParams {
     BigInteger R; // 盲化因子
     BigInteger pk; // 一次性公钥

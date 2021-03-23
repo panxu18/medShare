@@ -1,8 +1,6 @@
 package com.xp.medshare.service;
 
-import com.xp.medshare.model.CredentialRequestDto;
-import com.xp.medshare.model.IdCommitmentReuest;
-import com.xp.medshare.model.ReKeyRequestDto;
+import com.xp.medshare.model.*;
 import com.xp.medshare.model.domodel.CryptoDo;
 import com.xp.medshare.model.vomodel.Response;
 import com.xp.medshare.util.crypto.AnonymousParams;
@@ -38,4 +36,8 @@ public interface LocalService {
     Response<Object> computeIdCommit(IdCommitmentReuest request);
 
     Response<Object> verifyCommit(IdCommitmentReuest request);
+
+    Response<Object> sign(SignRequst request);
+
+    Response<Object> verifySignature(CredentialVerifyDto request);
 }

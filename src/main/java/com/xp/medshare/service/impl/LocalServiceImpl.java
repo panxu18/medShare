@@ -14,6 +14,7 @@ import com.xp.medshare.model.vomodel.ResponseCode;
 import com.xp.medshare.service.LocalService;
 import com.xp.medshare.util.ObjectUtil;
 import com.xp.medshare.util.crypto.*;
+import lombok.extern.slf4j.Slf4j;
 import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -25,6 +26,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Service
+@Slf4j
 public class LocalServiceImpl implements LocalService {
     @Autowired
     CredentialService credentialService;
@@ -54,7 +56,8 @@ public class LocalServiceImpl implements LocalService {
     public Response<Object> encrypt(String userPk, String rawData) {
         ProxyReEncryptionUtil encryption = new ProxyReEncryptionUtil();
         Crypto crypto = encryption.encrypt(new BigInteger(userPk), rawData);
-        return Response.of(ResponseCode.SUCCESS, crypto);
+        CryptoDo cryptoDo = CryptoDo.of(crypto);
+        return Response.of(ResponseCode.SUCCESS, cryptoDo);
     }
 
     @Override
@@ -88,8 +91,8 @@ public class LocalServiceImpl implements LocalService {
                 new BigInteger(requestDto.getOtherPk()));
 
         CredentialRequestDto credentialRequestDto = new CredentialRequestDto();
-        credentialRequestDto.setCptId(2000009);
-        credentialRequestDto.setPublisher("did:weid:1:0x4b57237c0f7873f7d8f13f8e0dc9254227f20c25");
+        credentialRequestDto.setCptId(2000020);
+        credentialRequestDto.setPublisher("did:weid:1:0x2df8d8d1d3baae363756f037b67646829f85e314");
         credentialRequestDto.setPublisherSk(requestDto.getUserSk());
         Map<String, Object> claim = new HashMap<>();
         claim.put("id", requestDto.getId());
@@ -138,6 +141,9 @@ public class LocalServiceImpl implements LocalService {
             } catch (IllegalAccessException e) {
                 throw new RuntimeException("raw data parse error");
             }
+        } else {
+            rawData.put("user",requestDto.getUser());
+            rawData.put("pk",requestDto.getUserPk());
         }
         return rawData;
     }
@@ -182,6 +188,7 @@ public class LocalServiceImpl implements LocalService {
         if (result.getResult()!= null) {
             simpleCredential = signCredential(result.getResult().getCredential(), requestDto.getPublisherSk());
         }
+        log.info("授权凭证 {}", JSONObject.toJSON(simpleCredential));
         return new Response(result.getErrorCode(), result.getErrorMessage(), simpleCredential);
     }
 
@@ -229,6 +236,23 @@ public class LocalServiceImpl implements LocalService {
     public Response<Object> verifyCommit(IdCommitmentReuest request) {
         AnonymousUtil util = new AnonymousUtil();
         boolean result = util.verifyIdCommitment(request.getParam1(), request.getParam2(), new BigInteger(request.getValue()));
+        return Response.of(ResponseCode.SUCCESS, result);
+    }
+
+    @Override
+    public Response<Object> sign(SignRequst request) {
+        String signature = SignUtil.sign(request.getData(), request.getSk());
+        return Response.of(ResponseCode.SUCCESS, signature);
+    }
+
+    @Override
+    public Response<Object> verifySignature(CredentialVerifyDto request) {
+        SimpleCredential credential = request.getCredential();
+        String issuer = credential.getRawData().getIssuer();
+
+        String signature = credential.getSignature();
+        credential.setSignature(null);
+        boolean result = SignUtil.verify(credential, signature, request.getPk());
         return Response.of(ResponseCode.SUCCESS, result);
     }
 

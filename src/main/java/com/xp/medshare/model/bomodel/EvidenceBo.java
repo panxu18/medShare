@@ -17,5 +17,5 @@ public class EvidenceBo {
     String hash;
     String signature;
     String user;
-    BigInteger pk;
+    String pk;
 }

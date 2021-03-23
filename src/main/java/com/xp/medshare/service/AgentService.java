@@ -3,6 +3,7 @@ package com.xp.medshare.service;
 import com.xp.medshare.model.CredentialRequestDto;
 import com.xp.medshare.model.SimpleCredential;
 import com.xp.medshare.model.domodel.AnonymousEvidenceDo;
+import com.xp.medshare.model.domodel.CryptoDo;
 import com.xp.medshare.model.domodel.EvidenceDo;
 import com.xp.medshare.model.vomodel.Response;
 import com.xp.medshare.util.crypto.Crypto;
@@ -38,5 +39,9 @@ public interface AgentService {
 
     Response<Object> reEncrypt(SimpleCredential credential);
 
-    Response<Object> uploadCrypto(String id, Crypto crypto);
+    Response<Object> uploadCrypto(String id, CryptoDo crypto);
+
+    Response<Object> querySupervisor();
+
+    Response<Object> queryUserAccount(String id);
 }

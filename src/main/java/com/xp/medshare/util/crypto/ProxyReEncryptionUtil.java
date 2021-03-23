@@ -16,7 +16,7 @@ public class ProxyReEncryptionUtil {
         // c2
         BigInteger hash0 = Sepc256Util.hash(userPk.times(alpha).toString()).key;
         BigInteger hash1 = Sepc256Util.hash(userPk.times(rand,hash0).toString()).key;
-        BigInteger c2 = hash1.xor(new BigInteger(rawData.getBytes()));
+        BigInteger c2 = sliceEncrypt(rawData.getBytes(), hash1);
         return new Crypto(c0, c1, c2);
     }
 
@@ -28,7 +28,7 @@ public class ProxyReEncryptionUtil {
         BigInteger c2 = crypto.c2;
         BigInteger hash0 = Sepc256Util.hash(c1.times(userSk).toString()).key;
         BigInteger hash1 = Sepc256Util.hash(userPk.times(c0,hash0).toString()).key;
-        byte[] result = hash1.xor(c2).toByteArray();
+        byte[] result = sliceDecrypt(c2,hash1);
         return new String(result);
     }
 
@@ -61,6 +61,34 @@ public class ProxyReEncryptionUtil {
         BigInteger c1 = crypto.c1;
         BigInteger invSk = Sepc256Util.inverse(sk);
         BigInteger hash1 = Sepc256Util.hash(new SimplePublicKey(c0).times(invSk).toString()).key;
-        return new String(c1.xor(hash1).toByteArray());
+        byte[] result = sliceDecrypt(c1,hash1);
+        return new String(result);
+    }
+
+    private BigInteger sliceEncrypt(byte[] rawBytes, BigInteger r) {
+        int sliceLength = r.toByteArray().length;
+        int round = rawBytes.length / sliceLength;
+        int rest = rawBytes.length % sliceLength;
+        int total = sliceLength * (round + Math.min(1, rest));
+        byte[] result = new byte[total];
+        for (int i = 0; i < rawBytes.length; i+=sliceLength) {
+            byte[] tem = Arrays.copyOfRange(rawBytes, i, i + sliceLength);
+            BigInteger slice = r.xor(new BigInteger(tem));
+            System.arraycopy(slice.toByteArray(),0, result, i, sliceLength);
+        }
+        return new BigInteger(result);
+    }
+
+    private byte[] sliceDecrypt(BigInteger c, BigInteger r) {
+        byte[] rawBytes = c.toByteArray();
+        int sliceLength = r.toByteArray().length;
+        int round = rawBytes.length / sliceLength;
+        byte[] result = new byte[round * sliceLength];
+        for (int i = 0; i < rawBytes.length; i+=sliceLength) {
+            byte[] tem = Arrays.copyOfRange(rawBytes, i, i + sliceLength);
+            BigInteger slice = r.xor(new BigInteger(tem));
+            System.arraycopy(slice.toByteArray(),0, result, i, sliceLength);
+        }
+        return result;
     }
 }

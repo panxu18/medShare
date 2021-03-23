@@ -1,6 +1,7 @@
 package com.xp.medshare.controller;
 
 import com.xp.medshare.model.CryptoUploadRequest;
+import com.xp.medshare.model.EvidenceComfirmDto;
 import com.xp.medshare.model.SimpleCredential;
 import com.xp.medshare.model.domodel.AnonymousEvidenceDo;
 import com.xp.medshare.model.domodel.EvidenceDo;
@@ -16,6 +17,7 @@ import java.util.Map;
 @Slf4j
 @RestController
 @RequestMapping("agent")
+@CrossOrigin
 public class AgentController {
 
     @Autowired
@@ -39,6 +41,7 @@ public class AgentController {
         try {
             return agentService.createOriginalRecord(data);
         } catch (Exception e) {
+            log.info("create evidence failed.", e);
             return Response.FAIL;
         }
     }
@@ -77,10 +80,10 @@ public class AgentController {
     }
 
     @PostMapping("evidence/confirm")
-    public Response<AssetVo> confirm(@RequestParam("id") String id, @RequestParam("signature") String signature){
+    public Response<AssetVo> confirm(@RequestBody EvidenceComfirmDto comfirm){
         Response response;
         try {
-            response = agentService.confirmRecord(id, signature);
+            response = agentService.confirmRecord(comfirm.getId(), comfirm.getSignature());
         } catch (Exception e) {
             log.info("query failed", e);
             response = Response.FAIL;
@@ -94,8 +97,18 @@ public class AgentController {
     }
 
     @GetMapping("user/document")
-    public Response<Object> queryUserDocument(String id) {
+    public Response<Object> queryUserDocument(@RequestParam("id") String id) {
         return agentService.queryDidDocument(id);
+    }
+
+    @GetMapping("user/account")
+    public Response<Object> queryUserAccount(@RequestParam("id") String id) {
+        return agentService.queryUserAccount(id);
+    }
+
+    @GetMapping("supervisor")
+    public Response<Object> querySupervisor() {
+        return agentService.querySupervisor();
     }
 
     @PostMapping("cpt/register")

@@ -45,6 +45,7 @@ public class RecordClient extends SimpleClient<Record> {
             requestParams = params.subList(0,13);
         }
         TransactionReceipt receipt = record.create(type, requestParams);
+        log.info("create result {}",receipt);
         List<Record.AddEventEventResponse> result = record.getAddEventEvents(receipt);
 
         Response response;
@@ -72,7 +73,7 @@ public class RecordClient extends SimpleClient<Record> {
             BigInteger type = result.getValue2();
             if (BigInteger.ZERO.equals(type)) {
                 EvidenceBo data = new EvidenceBo(details.get(0), type, details.get(2), details.get(3), details.get(4), details.get(5),
-                        details.get(6), new BigInteger(details.get(7)));
+                        details.get(6), details.get(7));
                 response = Response.of(ResponseCode.SUCCESS, data);
             } else {
                 AnonymousEvidenceDo data = new AnonymousEvidenceDo(details.get(0), type.toString(), details.get(2), details.get(3), details.get(4), details.get(5),
